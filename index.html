@@ -118,12 +118,14 @@
   // ====== SUPABASE (já preenchido) ======
   const SUPABASE_URL = "https://dtovqtfwkjkxzyrxoegz.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_JyIW3Qc0_wRxwdehMI9ISQ_XjR9Ux9E";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  // ✅ Use um nome diferente de "supabase" para não conflitar com o global do CDN
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
   // ====== WHATSAPP (troque para o seu número com DDI+DDD) ======
   const WHATSAPP_NUMBER = "5592999999999";
 
-  const moneyBR = (n) => Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  const moneyBR = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const waLink = (p) => {
     const msg = encodeURIComponent(`Olá! Quero essa promoção: ${p.name} por ${moneyBR(p.price)}. Link: ${p.buy_link}`);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
@@ -132,7 +134,13 @@
   let ALL = [];
 
   function escapeHTML(str){
-    return String(str||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m]));
   }
 
   function cardHTML(p){
@@ -172,17 +180,17 @@
     const q = (document.querySelector("#q").value || "").toLowerCase().trim();
     if(!q) return render(ALL);
     const f = ALL.filter(p => {
-      const blob = `${p.name} ${p.store||""} ${p.tag||""} ${p.coupon||""}`.toLowerCase();
+      const blob = `${p.name} ${p.store || ""} ${p.tag || ""} ${p.coupon || ""}`.toLowerCase();
       return blob.includes(q);
     });
     render(f);
   }
 
   async function loadPromos(){
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("promos")
       .select("*")
-      .order("created_at", { ascending:false });
+      .order("created_at", { ascending: false });
 
     if(error){
       console.error(error);
