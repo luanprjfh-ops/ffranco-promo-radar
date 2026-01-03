@@ -37,7 +37,7 @@
     body::before{
       content:"";
       position:fixed; inset:0;
-      background: url("./bg.png") center/cover no-repeat;
+      /* background opcional removido (bg.png não encontrado) */
       opacity:.22;
       z-index:-2;
     }
@@ -373,9 +373,9 @@
 
 <script>
   // ====== SUPABASE (SUAS CHAVES) ======
-  const SUPABASE_URL = "https://dtovqtfwkjkxzyrxoegz.supabase.co";
+  const SUPABASE_URL = "https://dtovqtfwkjkxzyrxoegz.sb.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_JyIW3Qc0_wRxwdehMI9ISQ_XjR9Ux9E";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
   const $ = (id)=>document.getElementById(id);
 
@@ -502,7 +502,7 @@
 
   async function delById(id){
     if(!confirm("Excluir esta promoção?")) return;
-    const { error } = await supabase.from("promos").delete().eq("id", id);
+    const { error } = await sb.from("promos").delete().eq("id", id);
     if(error){ console.error(error); alert("Erro ao excluir."); return; }
     clearForm();
     await loadList();
@@ -529,11 +529,11 @@
     const id = f.editingId.value;
 
     if(id){
-      const { error } = await supabase.from("promos").update(payload).eq("id", id);
+      const { error } = await sb.from("promos").update(payload).eq("id", id);
       if(error){ console.error(error); alert("Erro ao atualizar."); return; }
       alert("Atualizado!");
     }else{
-      const { error } = await supabase.from("promos").insert(payload);
+      const { error } = await sb.from("promos").insert(payload);
       if(error){ console.error(error); alert("Erro ao cadastrar."); return; }
       alert("Cadastrado!");
     }
@@ -550,12 +550,12 @@
     const email = $("email").value.trim();
     const password = $("password").value;
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     if(error){ $("loginMsg").textContent = "Erro: " + error.message; return; }
     $("loginMsg").textContent = "";
   };
 
-  $("logoutBtn").onclick = async ()=>{ await supabase.auth.signOut(); };
+  $("logoutBtn").onclick = async ()=>{ await sb.auth.signOut(); };
 
   // trocar senha
   $("changePassBtn").onclick = async ()=>{
@@ -567,7 +567,7 @@
     if(!p1 || p1.length < 8){ m.textContent = "Use pelo menos 8 caracteres."; return; }
     if(p1 !== p2){ m.textContent = "As senhas não conferem."; return; }
 
-    const { error } = await supabase.auth.updateUser({ password: p1 });
+    const { error } = await sb.auth.updateUser({ password: p1 });
     if(error){ console.error(error); m.textContent = "Erro: " + error.message; return; }
 
     $("newPass1").value = "";
@@ -592,10 +592,10 @@
     }
   }
 
-  supabase.auth.onAuthStateChange((_event, session)=>setUI(session));
+  sb.auth.onAuthStateChange((_event, session)=>setUI(session));
 
   (async ()=>{
-    const { data } = await supabase.auth.getSession();
+    const { data } = await sb.auth.getSession();
     setUI(data.session);
   })();
 </script>
